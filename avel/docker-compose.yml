@@ -1,0 +1,25 @@
+version: '3.9'
+services:
+  cockroachdb-1:
+    image: cockroachdb/cockroach:latest
+    command: start-single-node --insecure
+    volumes:
+      - cockroach-data-1:/cockroach/cockroach-data
+    ports:
+      - "26257:26257"
+      - "8080:8080"
+    networks:
+      - cockroachdb
+
+#  avel:
+#    build:
+#      dockerfile: Dockerfile
+#    ports:
+#      - "5000:8080"
+
+volumes:
+  cockroach-data-1:
+
+
+networks:
+  cockroachdb:
