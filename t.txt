@@ -1,0 +1,6 @@
+kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.14.4/cert-manager.yaml
+
+helm repo add cockroachdb https://charts.cockroachdb.com/
+helm repo update
+helm install cockroach --values values_cockroach.yaml cockroachdb/cockroachdb
+

@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: avel
+  labels:
+    app: avel
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: avel
+  template:
+    metadata:
+      name: avel
+      labels:
+        app: avel
+    spec:
+      containers:
+        - name: avel
+          image: alex23451234/avel:latest
+          imagePullPolicy: Always
+      restartPolicy: Always
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: avel-service
+spec:
+  selector:
+    app: avel
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 5000
+  type: LoadBalancer
+

@@ -1,0 +1,20 @@
+conf:
+  cache: "2Gi"
+  max-sql-memory: "4Gi"
+  statefulset:
+    replicas: 3
+
+  tls:
+    enabled: true
+    ca:
+      secret:
+        name: cockroach-ca
+    node:
+      secret:
+        name: cockroach-node
+    client:
+      secret:
+        name: cockroach-client
+
+  storage:
+    size: 100Gi
