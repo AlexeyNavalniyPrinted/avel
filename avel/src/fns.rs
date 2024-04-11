@@ -56,7 +56,6 @@ pub async fn save_short_link(link: web::Json<LinkShort>, app_state: Data<Arc<App
         .await {
         Ok(r) => r,
         Err(e) => {
-            eprintln!("{}", e);
             return HttpResponse::InternalServerError().body("Internal server error");
         }
     };
@@ -81,7 +80,6 @@ pub async fn save_short_link(link: web::Json<LinkShort>, app_state: Data<Arc<App
         .await {
         Ok(_) => HttpResponse::Ok().body(format!("New short link created: {}", short_url)),
         Err(e) => {
-            eprintln!("{}", e);
             HttpResponse::InternalServerError().body("Failed to save short link")
         }
     }
