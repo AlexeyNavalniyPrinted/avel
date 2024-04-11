@@ -1,13 +1,43 @@
 kubectl apply -f https://github.com/cert-manager/cert-manager/releases/download/v1.14.4/cert-manager.yaml
+kubectl apply -f cockroach/cockroach_issuer.yaml
 
 helm repo add cockroachdb https://charts.cockroachdb.com/
 helm repo update
-helm install cockroach --values values_cockroach.yaml cockroachdb/cockroachdb
+helm install cockroach --values cockroach/cockroach_values.yaml cockroachdb/cockroachdb
 
-kubectl apply -f .\cockroach-secure.yaml
-kubectl exec -it cockroachdb-client-secure -- cockroach sql --certs-dir=./cockroach-certs --host=cockroach-cockroachdb-public
+kubectl label svc cockroach-cockroachdb prometheus=cockroachdb
+
+echo "Get latest version here https://github.com/prometheus-operator/prometheus-operator/releases/"
+kubectl apply -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.73.0/bundle.yaml --server-side
+kubectl apply -f cockroach/prometheus.yaml
+
+# Configure this
+kubectl create secret generic alertmanager-cockroachdb --from-file=alertmanager.yaml=cockroach/alertmanager-config.yaml
+kubectl label secret alertmanager-cockroachdb app=cockroachdb
+
+kubectl apply -f https://raw.githubusercontent.com/cockroachdb/cockroach/master/cloud/kubernetes/prometheus/alert-rules.yaml
+
+# There is a dummy rule there
+# Execute
+# kubectl edit prometheusrules prometheus-cockroachdb-rules
+# And delete
+#- name: rules/dummy.rules
+#  rules:
+#  - alert: TestAlertManager
+#    expr: vector(1)
+
+kubectl apply -f cockroach/cockroach-secure.yaml
+kubectl exec -it cockroachdb-client-secure -- cockroach sql --certs-dir=./cockroach-certs --host=cockroach-cockroachdb-public # Root
+
+# SQL
 
 CREATE USER roach WITH LOGIN PASSWORD 'password';
-GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO roach;
+CREATE TABLE IF NOT EXISTS links(short_link TEXT, full_link TEXT, PRIMARY KEY(short_link, full_link));
+GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE links TO roach;
+
+# No SQL
+
+kubectl apply -f cockroach/app.yaml
 
 minikube delete ; minikube start --cpus=8 --memory=15800
+

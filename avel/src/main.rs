@@ -24,7 +24,6 @@ async fn main() -> std::io::Result<()> {
     let conn_url = "postgresql://roach:password@cockroach-cockroachdb-public.default.svc.cluster.local:26257/defaultdb?sslmode=verify-full&sslrootcert=/certs/ca.crt";
 
     let connection: CockroachDBSession = PgPool::connect(&conn_url).await.unwrap();
-    queries(&connection).await;
 
     let app_state = Data::new(Arc::new(AppState {
         cockroachdb_session: connection
@@ -46,10 +45,3 @@ async fn main() -> std::io::Result<()> {
 }
 
 
-async fn queries(connection: &CockroachDBSession) {
-    let b = query(
-        "CREATE TABLE IF NOT EXISTS links(short_link TEXT, full_link TEXT, PRIMARY KEY(short_link, full_link));"
-    );
-
-    b.execute(connection).await.unwrap();
-}

@@ -1,0 +1,25 @@
+global:
+  resolve_timeout: 5m
+route:
+  group_by: ['job']
+  group_wait: 30s
+  group_interval: 5m
+  repeat_interval: 12h
+  receiver: 'default-receiver'
+receivers:
+  # https://prometheus.io/docs/alerting/latest/configuration/#receiver
+  - name: 'default-receiver'
+    webhook_configs:
+      - url: 'http://alertmanagerwh:30500/'
+  - name: 'email-receiver'
+    email_configs:
+      - to: 'email'
+        from: 'alertmanager@gmail.com'
+        smarthost: smtp.gmail.com
+        auth_username: 'username'
+        auth_password: 'password'
+  - name: 'telegram-receiver'
+    telegram_configs:
+      - api_url: 'https://api.telegram.org/bot<botkey>/sendMessage'
+        chat_id: '-1002059450345'
+
