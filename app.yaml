@@ -5,7 +5,7 @@ metadata:
   labels:
     app: avel
 spec:
-  replicas: 1
+  replicas: 3
   selector:
     matchLabels:
       app: avel
@@ -19,8 +19,17 @@ spec:
         - name: avel
           image: alex23451234/avel:latest
           imagePullPolicy: Always
+          volumeMounts:
+            - mountPath: /certs
+              name: certs
       restartPolicy: Always
-
+      volumes:
+        - name: certs
+          secret:
+            secretName: cockroach-cockroachdb-ca-secret
+            items:
+              - key: ca.crt
+                path: ca.crt
 ---
 
 apiVersion: v1

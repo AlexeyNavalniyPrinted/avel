@@ -21,7 +21,7 @@ async fn main() -> std::io::Result<()> {
     env::set_var("RUST_LOG", "debug");
     env_logger::init();
 
-    let conn_url = "postgresql://user:password@cockroachdb-client-secure.default.pod.cluster.local:26257/defaultdb";
+    let conn_url = "postgresql://roach:password@cockroach-cockroachdb-public.default.svc.cluster.local:26257/defaultdb?sslmode=verify-full&sslrootcert=/certs/ca.crt";
 
     let connection: CockroachDBSession = PgPool::connect(&conn_url).await.unwrap();
     queries(&connection).await;

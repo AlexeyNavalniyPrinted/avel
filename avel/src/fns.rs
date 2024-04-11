@@ -31,8 +31,6 @@ pub async fn short_link(link: web::Path<String>, app_state: Data<Arc<AppState>>)
     };
 
     if let Some(row) = rows.get(0) {
-        println!("{:?}", row.columns());
-
         if let Some(full_link) = row.get::<Option<String>, &str>("full_link") {
             return Ok(Redirect::to(full_link));
         }

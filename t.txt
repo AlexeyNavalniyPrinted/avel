@@ -4,3 +4,10 @@ helm repo add cockroachdb https://charts.cockroachdb.com/
 helm repo update
 helm install cockroach --values values_cockroach.yaml cockroachdb/cockroachdb
 
+kubectl apply -f .\cockroach-secure.yaml
+kubectl exec -it cockroachdb-client-secure -- cockroach sql --certs-dir=./cockroach-certs --host=cockroach-cockroachdb-public
+
+CREATE USER roach WITH LOGIN PASSWORD 'password';
+GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO roach;
+
+minikube delete ; minikube start --cpus=8 --memory=15800
