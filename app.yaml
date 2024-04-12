@@ -22,6 +22,8 @@ spec:
           volumeMounts:
             - mountPath: /certs
               name: certs
+            - mountPath: /etc/redis
+              name: redis
       restartPolicy: Always
       volumes:
         - name: certs
@@ -30,6 +32,9 @@ spec:
             items:
               - key: ca.crt
                 path: ca.crt
+        - name: redis
+          secret:
+            secretName: redis
 
 ---
 

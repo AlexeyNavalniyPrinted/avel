@@ -1,11 +1,13 @@
 mod fns;
 
 use std::env;
+use std::fs::File;
+use std::io::Read;
 use std::sync::Arc;
 use actix_web::{App, HttpServer};
 use actix_web::middleware::Logger;
 use actix_web::web::Data;
-use sqlx::{PgPool, Pool, Postgres, query};
+use sqlx::{PgPool, Pool, Postgres};
 use log::info;
 use crate::fns::{hello, save_short_link, short_link};
 
@@ -20,6 +22,10 @@ type CockroachDBSession = Pool<Postgres>;
 async fn main() -> std::io::Result<()> {
     env::set_var("RUST_LOG", "debug");
     env_logger::init();
+
+    let mut redis_password = String::new();
+
+    File::open("/etc/redis/redis-password").unwrap().read_to_string(&mut redis_password).unwrap(); // redis-master.default.svc.cluster.local
 
     let conn_url = "postgresql://roach:password@cockroach-cockroachdb-public.default.svc.cluster.local:26257/defaultdb?sslmode=verify-full&sslrootcert=/certs/ca.crt";
 

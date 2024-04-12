@@ -35,6 +35,8 @@ GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE links TO roach;
 
 # No SQL
 
+helm install redis oci://registry-1.docker.io/bitnamicharts/redis
+
 kubectl apply -f app.yaml
 
 # Access to cluster useful information

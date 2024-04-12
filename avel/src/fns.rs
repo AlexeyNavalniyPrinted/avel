@@ -55,7 +55,7 @@ pub async fn save_short_link(link: web::Json<LinkShort>, app_state: Data<Arc<App
         .fetch_all(&app_state.cockroachdb_session)
         .await {
         Ok(r) => r,
-        Err(e) => {
+        Err(_) => {
             return HttpResponse::InternalServerError().body("Internal server error");
         }
     };
@@ -79,7 +79,7 @@ pub async fn save_short_link(link: web::Json<LinkShort>, app_state: Data<Arc<App
         .execute(&app_state.cockroachdb_session)
         .await {
         Ok(_) => HttpResponse::Ok().body(format!("New short link created: {}", short_url)),
-        Err(e) => {
+        Err(_) => {
             HttpResponse::InternalServerError().body("Failed to save short link")
         }
     }
