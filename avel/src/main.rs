@@ -9,14 +9,18 @@ use actix_web::middleware::Logger;
 use actix_web::web::Data;
 use sqlx::{PgPool, Pool, Postgres};
 use log::info;
+use redis::Connection;
+use tokio::sync::Mutex;
 use crate::fns::{hello, save_short_link, short_link};
 
 
 pub struct AppState {
-    pub cockroachdb_session: CockroachDBSession
+    pub cockroachdb_connection: CockroachDBSession,
+    pub redis_connection: RedisConnection
 }
 
 type CockroachDBSession = Pool<Postgres>;
+type RedisConnection = Mutex<Connection>;
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
@@ -25,19 +29,27 @@ async fn main() -> std::io::Result<()> {
 
     let mut redis_password = String::new();
 
-    File::open("/etc/redis/redis-password").unwrap().read_to_string(&mut redis_password).unwrap(); // redis-master.default.svc.cluster.local
+    File::open("/etc/redis/redis-password").unwrap().read_to_string(&mut redis_password).unwrap();
 
-    let conn_url = "postgresql://roach:password@cockroach-cockroachdb-public.default.svc.cluster.local:26257/defaultdb?sslmode=verify-full&sslrootcert=/certs/ca.crt";
+    let cockroach_con_url = "postgresql://roach:password@cockroach-cockroachdb-public.default.svc.cluster.local:26257/defaultdb?sslmode=verify-full&sslrootcert=/certs/ca.crt";
 
-    let connection: CockroachDBSession = PgPool::connect(&conn_url).await.unwrap();
+    let cockroachdb_connection: CockroachDBSession = PgPool::connect(&cockroach_con_url).await.unwrap();
+
+    info!("Successfully connected to cockroachdb");
+
+    let redis_client = redis::Client::open(format!("redis://:{}@redis-master.default.svc.cluster.local/", redis_password)).unwrap();
+    let redis_connection = redis_client.get_connection().unwrap();
+
+    info!("Successfully connected to redis");
 
     let app_state = Data::new(Arc::new(AppState {
-        cockroachdb_session: connection
+        cockroachdb_connection,
+        redis_connection: Mutex::new(redis_connection)
     }));
 
     info!("Successfully started server on 0.0.0.0:5000");
 
-    HttpServer::new(move || {
+    HttpServer::new(async move || {
         App::new()
             .wrap(Logger::default())
             .app_data(app_state.clone())

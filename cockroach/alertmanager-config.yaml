@@ -5,22 +5,21 @@ route:
   group_wait: 30s
   group_interval: 5m
   repeat_interval: 12h
-  receiver: 'default-receiver'
+  receiver: 'webhook'
 receivers:
-  # https://prometheus.io/docs/alerting/latest/configuration/#receiver
-  - name: 'default-receiver'
+  # Note that this is a dummy configuration just to allow AlertManager to start
+  - name: 'webhook'
     webhook_configs:
       - url: 'http://alertmanagerwh:30500/'
-  - name: 'email-receiver'
-    email_configs:
-      - to: 'email'
-        from: 'alertmanager@gmail.com'
-        smarthost: smtp.gmail.com
-        auth_username: 'username'
-        auth_password: 'password'
-  - name: 'telegram-receiver'
-    telegram_configs:
-      - api_url: 'https://api.telegram.org/bot/sendMessage'
-        bot_token: '<botkey>'
-        chat_id: chatid
-
+  #  - name: 'email-receiver'
+  #    email_configs:
+  #      - to: 'email'
+  #        from: 'alertmanager@gmail.com'
+  #        smarthost: smtp.gmail.com:587
+  #        auth_username: 'email
+  #        auth_password: 'email'
+#  - name: 'telegram-receiver'
+#    telegram_configs:
+#      - api_url: 'https://api.telegram.org'
+#        chat_id: chat id  # Negative + without ''
+#        bot_token: bot token # Without ''
