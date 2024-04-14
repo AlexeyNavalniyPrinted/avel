@@ -51,4 +51,27 @@ spec:
       targetPort: 5000
   type: NodePort
 
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: db-clear
+  labels:
+    app: db-clear
+spec:
+  selector:
+    matchLabels:
+      app: db-clear
+
+  template:
+    metadata:
+      name: db-clear
+      labels:
+        app: db-clear
+    spec:
+      containers:
+        - name: db-clear
+          image: alex23451234/avel-clear:latest
+          imagePullPolicy: Always
 

@@ -16,6 +16,7 @@ kubectl apply -f cockroach/prometheus.yaml
 
 kubectl create secret generic alertmanager-cockroachdb --from-file=alertmanager.yaml=cockroach/alertmanager-config.yaml
 kubectl label secret alertmanager-cockroachdb app=cockroachdb
+kubectl apply -f https://raw.githubusercontent.com/cockroachdb/cockroach/master/cloud/kubernetes/prometheus/alertmanager.yaml
 kubectl apply -f cockroach/alertmanager.yaml
 kubectl apply -f https://raw.githubusercontent.com/cockroachdb/cockroach/master/cloud/kubernetes/prometheus/alert-rules.yaml
 # There is a dummy rule there
@@ -26,7 +27,6 @@ kubectl apply -f https://raw.githubusercontent.com/cockroachdb/cockroach/master/
 #  rules:
 #  - alert: TestAlertManager
 #    expr: vector(1)
-# If you care about it
 kubectl apply -f cockroach/cockroach-secure.yaml
 
 kubectl exec -it cockroachdb-client-secure -- cockroach sql --certs-dir=./cockroach-certs --host=cockroach-cockroachdb-public # Root
@@ -42,7 +42,7 @@ GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE links TO roach;
 helm install redis oci://registry-1.docker.io/bitnamicharts/redis
 
 kubectl apply -f app.yaml
-
+w
 # Access to cluster useful information
 
 kubectl port-forward service/cockroach-cockroachdb-public 8080 # localhost:8080 / roach:password
@@ -52,5 +52,5 @@ kubectl port-forward alertmanager-cockroachdb-0 9093 # localhost:9093
 minikube delete ; minikube start --cpus=8 --memory=15800
 
 
-
+# Im debugging alert manager issue
 kubectl delete secret alertmanager-cockroachdb;kubectl delete -f cockroach/alertmanager.yaml;kubectl create secret generic alertmanager-cockroachdb --from-file=alertmanager.yaml=cockroach/my-alertmanager-config.yaml;kubectl label secret alertmanager-cockroachdb app=cockroachdb;kubectl apply -f cockroach/alertmanager.yaml;
