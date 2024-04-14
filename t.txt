@@ -5,6 +5,7 @@ kubectl wait --for=condition=available --timeout=600s deployment/cert-manager-ca
 kubectl wait --for=condition=available --timeout=600s deployment/cert-manager-webhook -n cert-manager
 kubectl apply -f cockroach/cockroach_issuer.yaml
 helm repo add cockroachdb https://charts.cockroachdb.com/
+helm repo add grafana https://grafana.github.io/helm-charts
 helm repo update
 helm install cockroach --values cockroach/cockroach_values.yaml cockroachdb/cockroachdb
 kubectl label svc cockroach-cockroachdb prometheus=cockroachdb
@@ -27,6 +28,9 @@ kubectl apply -f https://raw.githubusercontent.com/cockroachdb/cockroach/master/
 #  rules:
 #  - alert: TestAlertManager
 #    expr: vector(1)
+
+helm install grafana grafana/grafana
+
 kubectl apply -f cockroach/cockroach-secure.yaml
 
 kubectl exec -it cockroachdb-client-secure -- cockroach sql --certs-dir=./cockroach-certs --host=cockroach-cockroachdb-public # Root
@@ -42,15 +46,23 @@ GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE links TO roach;
 helm install redis oci://registry-1.docker.io/bitnamicharts/redis
 
 kubectl apply -f app.yaml
-w
+
 # Access to cluster useful information
 
+kubectl exec -it cockroachdb-client-secure -- cockroach sql --certs-dir=./cockroach-certs --host=cockroach-cockroachdb-public # Access to cockroach db as root
 kubectl port-forward service/cockroach-cockroachdb-public 8080 # localhost:8080 / roach:password
 kubectl port-forward prometheus-cockroachdb-0 9090 # localhost:9090
 kubectl port-forward alertmanager-cockroachdb-0 9093 # localhost:9093
+# You can get grafana admin password by using
+kubectl get secret grafana  -o yaml
+# And decoding the password from base64
+# Linux command
+kubectl get secret --namespace monitoring my-grafana -o jsonpath="{.data.admin-password}" | base64 --decode ; echo
+kubectl port-forward deployment/grafana 3000 # localhost:3000 / admin:$password
+
+
+
 
 minikube delete ; minikube start --cpus=8 --memory=15800
-
-
 # Im debugging alert manager issue
 kubectl delete secret alertmanager-cockroachdb;kubectl delete -f cockroach/alertmanager.yaml;kubectl create secret generic alertmanager-cockroachdb --from-file=alertmanager.yaml=cockroach/my-alertmanager-config.yaml;kubectl label secret alertmanager-cockroachdb app=cockroachdb;kubectl apply -f cockroach/alertmanager.yaml;
