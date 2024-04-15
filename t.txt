@@ -18,7 +18,6 @@ kubectl apply -f cockroach/prometheus.yaml
 kubectl create secret generic alertmanager-cockroachdb --from-file=alertmanager.yaml=cockroach/alertmanager-config.yaml
 kubectl label secret alertmanager-cockroachdb app=cockroachdb
 kubectl apply -f https://raw.githubusercontent.com/cockroachdb/cockroach/master/cloud/kubernetes/prometheus/alertmanager.yaml
-kubectl apply -f cockroach/alertmanager.yaml
 kubectl apply -f https://raw.githubusercontent.com/cockroachdb/cockroach/master/cloud/kubernetes/prometheus/alert-rules.yaml
 # There is a dummy rule there
 # Execute
@@ -33,15 +32,7 @@ helm install grafana grafana/grafana
 
 kubectl apply -f cockroach/cockroach-secure.yaml
 
-kubectl exec -it cockroachdb-client-secure -- cockroach sql --certs-dir=./cockroach-certs --host=cockroach-cockroachdb-public # Root
-
-# SQL
-
-CREATE USER roach WITH LOGIN PASSWORD 'password';
-CREATE TABLE IF NOT EXISTS links(short_link TEXT, full_link TEXT, last_accessed TIMESTAMP, PRIMARY KEY(short_link));
-GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE links TO roach;
-
-# No SQL
+kubectl exec -it cockroachdb-client-secure -- cockroach sql --certs-dir=./cockroach-certs --host=cockroach-cockroachdb-public -e "CREATE USER roach WITH LOGIN PASSWORD 'password'; CREATE TABLE IF NOT EXISTS links(short_link TEXT, full_link TEXT, last_accessed TIMESTAMP, PRIMARY KEY(short_link)); GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE links TO roach;"
 
 helm install redis oci://registry-1.docker.io/bitnamicharts/redis
 
@@ -49,19 +40,23 @@ kubectl apply -f app.yaml
 
 # Access to cluster useful information
 
-kubectl exec -it cockroachdb-client-secure -- cockroach sql --certs-dir=./cockroach-certs --host=cockroach-cockroachdb-public # Access to cockroach db as root
-kubectl port-forward service/cockroach-cockroachdb-public 8080 # localhost:8080 / roach:password
-kubectl port-forward prometheus-cockroachdb-0 9090 # localhost:9090
-kubectl port-forward alertmanager-cockroachdb-0 9093 # localhost:9093
-# You can get grafana admin password by using
-kubectl get secret grafana  -o yaml
-# And decoding the password from base64
+kubectl exec -it cockroachdb-client-secure -- cockroach sql --certs-dir=./cockroach-certs --host=cockroach-cockroachdb-public # Access cockroach db as root
+kubectl port-forward service/cockroach-cockroachdb-public 8080 # localhost:8080 / roach:password / Access cockroachdb admin panel
+kubectl port-forward prometheus-cockroachdb-0 9090 # localhost:9090 / Access prometheus admin panel
+kubectl port-forward alertmanager-cockroachdb-0 9093 # localhost:9093 / Access alertmanager
+
+# Windows (PowerShell) command
+
+kubectl get secret grafana -o jsonpath="{.data.admin-password}" | ForEach-Object { [System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String($_)) }
+
 # Linux command
-kubectl get secret --namespace monitoring my-grafana -o jsonpath="{.data.admin-password}" | base64 --decode ; echo
-kubectl port-forward deployment/grafana 3000 # localhost:3000 / admin:$password
+kubectl get secret grafana -o jsonpath="{.data.admin-password}" | base64 --decode ; echo
 
+kubectl port-forward deployment/grafana 3000 # localhost:3000 / admin:password_from_command_above
 
-
+To add prometheus to grafana, you need to log in grafana as shown above
+Add a data source and set the URL to http://prometheus-operated.default.svc.cluster.local:9090.
+Then create a visualization, and it got to be working
 
 minikube delete ; minikube start --cpus=8 --memory=15800
 # Im debugging alert manager issue
