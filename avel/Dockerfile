@@ -24,4 +24,10 @@ WORKDIR /app
 
 COPY --from=builder /app/target/release/avel .
 
+RUN groupadd -r secure && useradd -r -g secure secure-user
+
+RUN chown -R secure-user:secure /app
+
+USER secure-user
+
 CMD ["/app/avel"]

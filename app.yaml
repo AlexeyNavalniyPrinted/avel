@@ -17,6 +17,11 @@ spec:
     spec:
       containers:
         - name: avel
+          securityContext:
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
           image: alex23451234/avel:latest
           imagePullPolicy: Always
           volumeMounts:
@@ -72,6 +77,25 @@ spec:
     spec:
       containers:
         - name: db-clear
+          securityContext:
+            capabilities:
+              drop:
+                - ALL
           image: alex23451234/avel-clear:latest
           imagePullPolicy: Always
 
+---
+
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: deny-all
+spec:
+  podSelector:
+    matchLabels:
+      app: db-clear
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress: []
+  egress: []
