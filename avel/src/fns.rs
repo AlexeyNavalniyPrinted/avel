@@ -35,7 +35,7 @@ pub async fn short_link(link: web::Path<String>, app_state: Data<Arc<AppState>>)
         .fetch_all(&app_state.cockroachdb_connection)
         .await {
         Ok(r) => r,
-        Err(e) => {
+        Err(_) => {
             return Err(Box::new(error::ErrorServiceUnavailable("The server is unavailable")));
         }
     };

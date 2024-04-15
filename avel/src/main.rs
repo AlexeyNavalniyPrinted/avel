@@ -49,7 +49,7 @@ async fn main() -> std::io::Result<()> {
 
     info!("Successfully started server on 0.0.0.0:5000");
 
-    HttpServer::new(async move || {
+    HttpServer::new(move || {
         App::new()
             .wrap(Logger::default())
             .app_data(app_state.clone())

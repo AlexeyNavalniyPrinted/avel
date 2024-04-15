@@ -18,7 +18,7 @@ COPY . .
 
 RUN cargo build --release
 
-FROM linuxcontainers/debian-slim:latest
+FROM debian:stable-slim
 
 WORKDIR /app
 
