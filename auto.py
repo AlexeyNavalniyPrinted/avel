@@ -1,5 +1,5 @@
 import subprocess
-import time
+
 
 def run_command(command):
     print(f"Executing command: {command}")
@@ -7,15 +7,20 @@ def run_command(command):
     stdout, stderr = process.communicate()
     if process.returncode != 0:
         if command.startswith("helm install") and "cannot re-use a name that is still in use" in stderr.decode("utf-8"):
-            print(f"{command} / Error: cannot re-use a name that is still in use ")
+            print(f"{command} / {stderr.decode("utf-8")}")
             return stdout.decode("utf-8")
+        if command.startswith("kubectl create secret") and "already exists" in stderr.decode("utf-8"):
+            print(f"{command} / {stderr.decode("utf-8")}")
+            return stdout.decode("utf-8")
+
         print(f"Error executing command: {command}")
         print(f"Error message: {stderr.decode('utf-8')}")
         exit(1)
     print(f"Command executed successfully: {command}")
     return stdout.decode('utf-8')
 
-def main():
+
+def main(jenkins=False):
     print("Starting script execution...")
 
     print("Applying cert-manager...")
@@ -31,6 +36,7 @@ def main():
     print("Adding Helm repositories and updating...")
     run_command("helm repo add cockroachdb https://charts.cockroachdb.com/")
     run_command("helm repo add grafana https://grafana.github.io/helm-charts")
+    run_command("helm repo add jenkins https://charts.jenkins.io")
     run_command("helm repo update")
 
     print("Installing CockroachDB...")
@@ -62,10 +68,14 @@ def main():
     print("Installing Redis...")
     run_command("helm install redis oci://registry-1.docker.io/bitnamicharts/redis")
 
+    if jenkins:
+        print("Installing Jenkins...")
+        run_command("helm install jenkins jenkins/jenkins")
+
     print("Applying the application YAML file...")
     run_command("kubectl apply -f app.yaml")
 
     print("Script execution completed successfully.")
 
 if __name__ == "__main__":
-    main()
+    main(True)

@@ -46,7 +46,6 @@ kubectl exec -it cockroachdb-client-secure -- cockroach sql --certs-dir=./cockro
 kubectl port-forward service/cockroach-cockroachdb-public 8080 # localhost:8080 / roach:password / Access cockroachdb admin panel
 kubectl port-forward prometheus-cockroachdb-0 9090 # localhost:9090 / Access prometheus admin panel
 kubectl port-forward alertmanager-cockroachdb-0 9093 # localhost:9093 / Access alertmanager
-
 # Windows (PowerShell) command
 
 kubectl get secret grafana -o jsonpath="{.data.admin-password}" | ForEach-Object { [System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String($_)) }
@@ -60,6 +59,22 @@ To add prometheus to grafana, you need to log in grafana as shown above
 Add a data source and set the URL to http://prometheus-operated.default.svc.cluster.local:9090.
 Then create a visualization, and it got to be working
 
+# Windows (PowerShell) command
+
+kubectl get secret jenkins -o jsonpath="{.data.jenkins-admin-password}" | ForEach-Object { [System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String($_)) }
+
+# Linux command
+
+kubectl get secret jenkins -o jsonpath="{.data.jenkins-admin-password}" | base64 --decode ; echo
+
+kubectl port-forward svc/jenkins 8080:8080 # localhost:8080 / admin:password_from_command_above
+
 minikube delete ; minikube start --cpus=8 --memory=15800
 # Im debugging alert manager issue
 kubectl delete secret alertmanager-cockroachdb;kubectl delete -f cockroach/alertmanager.yaml;kubectl create secret generic alertmanager-cockroachdb --from-file=alertmanager.yaml=cockroach/my-alertmanager-config.yaml;kubectl label secret alertmanager-cockroachdb app=cockroachdb;kubectl apply -f cockroach/alertmanager.yaml;
+
+
+helm repo add jenkins https://charts.jenkins.io
+helm repo update
+
+kubectl apply -f https://raw.githubusercontent.com/jenkins-infra/jenkins.io/master/content/doc/tutorials/kubernetes/installing-jenkins-on-kubernetes/jenkins-volume.yaml
