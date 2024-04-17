@@ -20,7 +20,7 @@ def run_command(command):
     return stdout.decode('utf-8')
 
 
-def main(jenkins=False):
+def main(jenkins=False, argocd=False):
     print("Starting script execution...")
 
     print("Applying cert-manager...")
@@ -72,10 +72,12 @@ def main(jenkins=False):
         print("Installing Jenkins...")
         run_command("helm install jenkins jenkins/jenkins")
 
+
+
     print("Applying the application YAML file...")
     run_command("kubectl apply -f app.yaml")
 
     print("Script execution completed successfully.")
 
 if __name__ == "__main__":
-    main(jenkins = True)
+    main(jenkins = False, argocd=False)

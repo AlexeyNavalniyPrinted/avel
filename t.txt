@@ -59,13 +59,7 @@ To add prometheus to grafana, you need to log in grafana as shown above
 Add a data source and set the URL to http://prometheus-operated.default.svc.cluster.local:9090.
 Then create a visualization, and it got to be working
 
-# Windows (PowerShell) command
-
-kubectl get secret jenkins -o jsonpath="{.data.jenkins-admin-password}" | ForEach-Object { [System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String($_)) }
-
-# Linux command
-
-kubectl get secret jenkins -o jsonpath="{.data.jenkins-admin-password}" | base64 --decode ; echo
+kubectl exec --namespace default -it svc/jenkins -c jenkins -- /bin/cat /run/secrets/additional/chart-admin-password
 
 kubectl port-forward svc/jenkins 8080:8080 # localhost:8080 / admin:password_from_command_above
 
