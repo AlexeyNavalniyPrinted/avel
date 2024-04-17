@@ -15,21 +15,6 @@ kubectl label svc cockroach-cockroachdb prometheus=cockroachdb
 kubectl apply -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.73.1/bundle.yaml --server-side
 kubectl apply -f cockroach/prometheus.yaml
 
-# Configure this
-
-kubectl create secret generic alertmanager-cockroachdb --from-file=alertmanager.yaml=cockroach/alertmanager-config.yaml
-kubectl label secret alertmanager-cockroachdb app=cockroachdb
-kubectl apply -f https://raw.githubusercontent.com/cockroachdb/cockroach/master/cloud/kubernetes/prometheus/alertmanager.yaml
-kubectl apply -f https://raw.githubusercontent.com/cockroachdb/cockroach/master/cloud/kubernetes/prometheus/alert-rules.yaml
-# There is a dummy rule there
-# Execute
-# kubectl edit prometheusrules prometheus-cockroachdb-rules
-# And delete
-#- name: rules/dummy.rules
-#  rules:
-#  - alert: TestAlertManager
-#    expr: vector(1)
-
 helm install grafana grafana/grafana
 
 kubectl apply -f cockroach/cockroach-secure.yaml
@@ -64,8 +49,6 @@ kubectl exec --namespace default -it svc/jenkins -c jenkins -- /bin/cat /run/sec
 kubectl port-forward svc/jenkins 8080:8080 # localhost:8080 / admin:password_from_command_above
 
 minikube delete ; minikube start --cpus=8 --memory=15800
-# Im debugging alert manager issue
-kubectl delete secret alertmanager-cockroachdb;kubectl delete -f cockroach/alertmanager.yaml;kubectl create secret generic alertmanager-cockroachdb --from-file=alertmanager.yaml=cockroach/my-alertmanager-config.yaml;kubectl label secret alertmanager-cockroachdb app=cockroachdb;kubectl apply -f cockroach/alertmanager.yaml;
 
 helm repo add jenkins https://charts.jenkins.io
 helm repo update

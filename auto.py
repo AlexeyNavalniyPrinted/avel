@@ -36,7 +36,6 @@ def main(jenkins=False, argocd=False):
     print("Adding Helm repositories and updating...")
     run_command("helm repo add cockroachdb https://charts.cockroachdb.com/")
     run_command("helm repo add grafana https://grafana.github.io/helm-charts")
-    run_command("helm repo add jenkins https://charts.jenkins.io")
     run_command("helm repo update")
 
     print("Installing CockroachDB...")
@@ -70,9 +69,10 @@ def main(jenkins=False, argocd=False):
 
     if jenkins:
         print("Installing Jenkins...")
+        run_command("helm repo add jenkins https://charts.jenkins.io")
+        run_command("helm repo update jenkins")
         run_command("helm install jenkins jenkins/jenkins")
-
-
+        run_command("kubectl apply -f https://raw.githubusercontent.com/jenkins-infra/jenkins.io/master/content/doc/tutorials/kubernetes/installing-jenkins-on-kubernetes/jenkins-volume.yaml")
 
     print("Applying the application YAML file...")
     run_command("kubectl apply -f app.yaml")
