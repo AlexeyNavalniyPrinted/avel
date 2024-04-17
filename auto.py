@@ -78,4 +78,4 @@ def main(jenkins=False):
     print("Script execution completed successfully.")
 
 if __name__ == "__main__":
-    main(True)
+    main(jenkins = True)

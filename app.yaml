@@ -23,7 +23,7 @@ spec:
               drop:
                 - ALL
           image: alex23451234/avel:latest
-          imagePullPolicy: Always
+          imagePullPolicy: IfNotPresent
           volumeMounts:
             - mountPath: /certs
               name: certs
@@ -82,7 +82,7 @@ spec:
               drop:
                 - ALL
           image: alex23451234/avel-clear:latest
-          imagePullPolicy: Always
+          imagePullPolicy: IfNotPresent
 
 ---
 

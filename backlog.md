@@ -1,5 +1,5 @@
-1. Fix alert manager connection to cockroach db /* I HAVE NO FUCKING (Don't use 'FUCKING', it's profane. (by 'alex' style guide)) CLUE HOW */ 
-2. Fix Jenkins pipeline error 
+1. Fix alert manager connection to cockroach db /* I HAVE NO FUCKING (Don't use 'FUCKING', it's profane. (by 'alex' style guide)) CLUE HOW */
+2. Fix Jenkins pipeline error
 3. Add monitoring to everything
 4. Learn about istio and check if I can integrate it
 5. Learn about Jaeger and check if I can integrate it

@@ -1,42 +1,40 @@
 pipeline{
+    environment {
+        dockerimagename = "alex23451234/avel"
+        dockerImage = ""
+    }
     agent any
     stages {
-        stage('Build Maven') {
+        stage( 'Pull git repository' ) {
             steps{
                 checkout([$class: 'GitSCM', branches: [[name: '*/main']], extensions: [], userRemoteConfigs: [[url: 'https://github.com/AlexeyNavalniyPrinted/avel']]])
             }
         }
 
-        stage('Build Docker Image') {
+        stage( 'Static code analysis' ) {
+            steps{
+                sh 'echo not implemented'
+            }
+        }
+
+        stage( 'Build Docker Image' ) {
             steps {
                 script {
-                  sh 'docker build -t alex23451234/avel:latest -f Dockerfile ./avel/'
+                    dockerImage = docker.build dockerimagename
                 }
             }
         }
 
-        stage('Deploy Docker Image') {
+        stage( 'Push Docker Image' ) {
             steps {
                 script {
-                 withCredentials([string(credentialsId: 'dockerhub-pwd', variable: 'dockerhubpwd')]) {
-                    sh 'docker login -u alex23451234 -p ${dockerhubpwd}'
-                 }
-                 sh 'docker push alex23451234/avel:latest'
-                 }
-            }
-        }
-
-        stage('Deploy App on k8s') {
-            steps {
-                script {
-                    withKubeConfig([credentialsId: 'minikube-config', variable: 'minikube-config']) {
-                        sshagent([''])
-                        sh 'python auto.py'
+                    withCredentials([string(credentialsId: 'dockerhub-credentials', variable: 'dockerhub-credentials')]) {
+                        docker.withRegistry('https://registry.hub.docker.com', dockerhub-credentials) {
+                            dockerImage.push("latest")
+                        }
                     }
                 }
             }
         }
     }
 }
-
-// use sshagent(['ssh-agent-secret-name-in-jenkins']) {} if remote k8s cluster
