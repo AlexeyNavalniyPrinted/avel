@@ -20,7 +20,7 @@ def run_command(command):
     return stdout.decode('utf-8')
 
 
-def main(jenkins=False, argocd=False):
+def main(ci=False, cd=False):
     print("Starting script execution...")
 
     print("Applying cert-manager...")
@@ -67,12 +67,16 @@ def main(jenkins=False, argocd=False):
     print("Installing Redis...")
     run_command("helm install redis oci://registry-1.docker.io/bitnamicharts/redis")
 
-    if jenkins:
+    if ci:
         print("Installing Jenkins...")
         run_command("helm repo add jenkins https://charts.jenkins.io")
         run_command("helm repo update jenkins")
         run_command("helm install jenkins jenkins/jenkins")
         run_command("kubectl apply -f https://raw.githubusercontent.com/jenkins-infra/jenkins.io/master/content/doc/tutorials/kubernetes/installing-jenkins-on-kubernetes/jenkins-volume.yaml")
+        print("Installing sonarqube")
+        run_command("helm repo add sonarqube https://SonarSource.github.io/helm-chart-sonarqube")
+        run_command("helm repo update sonarqube")
+        run_command("helm install sonarqube sonarqube/sonarqube --set sonar.admin.password=password")
 
     print("Applying the application YAML file...")
     run_command("kubectl apply -f app.yaml")
@@ -80,4 +84,4 @@ def main(jenkins=False, argocd=False):
     print("Script execution completed successfully.")
 
 if __name__ == "__main__":
-    main(jenkins = False, argocd=False)
+    main(ci = False, cd=False)

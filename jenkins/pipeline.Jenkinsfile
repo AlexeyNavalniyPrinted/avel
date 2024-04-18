@@ -1,27 +1,32 @@
 pipeline {
+
+    environment {
+        SONAR_PROJECT_KEY = "AlexeyNavalniyPrinted_avel_00c2ac06-035e-4591-964e-229da28aa9fd"
+    }
+
     agent {
         kubernetes {
             label 'docker-build-pod'
-            yaml
-            """
+            yaml """
             apiVersion: v1
             kind: Pod
             spec:
-             containers:
-             - name: docker
-                image: docker:dind
-                command: ['sleep']
-                args: ['infinity']
-                volumeMounts:
-                - mountPath: /var/run/docker.sock
-                  name: docker-sock
-             volumes:
-             - name: docker-sock
-                hostPath:
-                  path: /var/run/docker.sock
+              containers:
+                - name: docker
+                  image: docker:dind
+                  command: [ 'sleep' ]
+                  args: [ 'infinity' ]
+                  volumeMounts:
+                    - mountPath: /var/run/docker.sock
+                      name: docker-sock
+              volumes:
+                - name: docker-sock
+                  hostPath:
+                    path: /var/run/docker.sock
             """
         }
     }
+
     stages {
         stage('Pull git repository') {
             steps {
@@ -36,7 +41,12 @@ pipeline {
 
         stage('Static code analysis') {
             steps {
-                sh 'echo not implemented'
+                script {
+                    def scannerHome = tool 'SonarScanner'
+                    withSonarQubeEnv(installationName: 'sonarqube') {
+                        sh "${scannerHome}/bin/sonar-scanner -Dsonar.projectKey=${env.SONAR_PROJECT_KEY}"
+                    }
+                }
             }
         }
 
@@ -52,7 +62,7 @@ pipeline {
             steps {
                 container('docker') {
                     withCredentials([usernamePassword(credentialsId: 'dockerhub-credentials', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
-                        sh 'docker login --user $USERNAME --password-stdin $PASSWORD'
+                        sh 'docker login -u $USERNAME --password-stdin $PASSWORD'
                         sh 'docker push alex23451234/avel:latest'
                     }
                 }
@@ -60,3 +70,4 @@ pipeline {
         }
     }
 }
+
