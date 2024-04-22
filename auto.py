@@ -20,7 +20,7 @@ def run_command(command):
     return stdout.decode('utf-8')
 
 
-def main(ci=False, cd=False):
+def main(pipeline=False):
     print("Starting script execution...")
 
     print("Applying cert-manager...")
@@ -48,13 +48,13 @@ def main(ci=False, cd=False):
     run_command("kubectl apply -f https://raw.githubusercontent.com/prometheus-operator/prometheus-operator/v0.73.1/bundle.yaml --server-side")
     run_command("kubectl apply -f cockroach/prometheus.yaml")
 
-    print("Creating secret for Alertmanager configuration...")
-    run_command("kubectl create secret generic alertmanager-cockroachdb --from-file=alertmanager.yaml=cockroach/alertmanager-config.yaml")
-    run_command("kubectl label secret alertmanager-cockroachdb app=cockroachdb")
+    # print("Creating secret for Alertmanager configuration...")
+    # run_command("kubectl create secret generic alertmanager-cockroachdb --from-file=alertmanager.yaml=cockroach/alertmanager-config.yaml")
+    # run_command("kubectl label secret alertmanager-cockroachdb app=cockroachdb")
 
-    print("Applying Alertmanager configurations...")
-    run_command("kubectl apply -f https://raw.githubusercontent.com/cockroachdb/cockroach/master/cloud/kubernetes/prometheus/alertmanager.yaml")
-    run_command("kubectl apply -f https://raw.githubusercontent.com/cockroachdb/cockroach/master/cloud/kubernetes/prometheus/alert-rules.yaml")
+    # print("Applying Alertmanager configurations...")
+    # run_command("kubectl apply -f https://raw.githubusercontent.com/cockroachdb/cockroach/master/cloud/kubernetes/prometheus/alertmanager.yaml")
+    # run_command("kubectl apply -f https://raw.githubusercontent.com/cockroachdb/cockroach/master/cloud/kubernetes/prometheus/alert-rules.yaml")
 
     print("Installing Grafana...")
     run_command("helm install grafana grafana/grafana")
@@ -67,7 +67,7 @@ def main(ci=False, cd=False):
     print("Installing Redis...")
     run_command("helm install redis oci://registry-1.docker.io/bitnamicharts/redis")
 
-    if ci:
+    if pipeline:
         print("Installing Jenkins...")
         run_command("helm repo add jenkins https://charts.jenkins.io")
         run_command("helm repo update jenkins")
@@ -84,4 +84,4 @@ def main(ci=False, cd=False):
     print("Script execution completed successfully.")
 
 if __name__ == "__main__":
-    main(ci = False, cd=False)
+    main(pipeline = False)

@@ -56,6 +56,8 @@ helm repo add jenkins https://charts.jenkins.io
 helm repo add sonarqube https://SonarSource.github.io/helm-chart-sonarqube
 helm repo update
 helm install jenkins jenkins/jenkins
+kubectl apply -f https://raw.githubusercontent.com/jenkins-infra/jenkins.io/master/content/doc/tutorials/kubernetes/installing-jenkins-on-kubernetes/jenkins-volume.yaml
 helm install sonarqube sonarqube/sonarqube --set sonar.admin.password=password
 
-kubectl apply -f https://raw.githubusercontent.com/jenkins-infra/jenkins.io/master/content/doc/tutorials/kubernetes/installing-jenkins-on-kubernetes/jenkins-volume.yaml
+
+

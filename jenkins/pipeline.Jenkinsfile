@@ -1,5 +1,4 @@
 pipeline {
-
     environment {
         SONAR_PROJECT_KEY = "AlexeyNavalniyPrinted_avel_00c2ac06-035e-4591-964e-229da28aa9fd"
     }
@@ -65,6 +64,14 @@ pipeline {
                         sh 'docker login -u $USERNAME --password-stdin $PASSWORD'
                         sh 'docker push alex23451234/avel:latest'
                     }
+                }
+            }
+        }
+
+        stage('Deploy to Kubernetes') {
+            steps {
+                script {
+                    kubernetesDeploy(configs: "app.yaml")
                 }
             }
         }
