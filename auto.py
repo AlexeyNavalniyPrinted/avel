@@ -63,6 +63,7 @@ def main(pipeline=False):
     run_command("kubectl apply -f cockroach/cockroach-secure.yaml")
 
     print("Executing SQL commands to create a user and a table...")
+    run_command("kubectl wait --for=condition=ready --timeout=600s pod/cockroachdb-client-secure")
     run_command("kubectl exec -it cockroachdb-client-secure -- cockroach sql --certs-dir=./cockroach-certs --host=cockroach-cockroachdb-public -e \"CREATE USER roach WITH LOGIN PASSWORD 'password'; CREATE TABLE IF NOT EXISTS links(short_link TEXT, full_link TEXT, last_accessed TIMESTAMP, PRIMARY KEY(short_link)); GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE links TO roach;\"")
     print("Installing Redis...")
     run_command("helm install redis oci://registry-1.docker.io/bitnamicharts/redis")

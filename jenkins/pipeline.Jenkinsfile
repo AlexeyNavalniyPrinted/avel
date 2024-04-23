@@ -1,8 +1,4 @@
 pipeline {
-    environment {
-        SONAR_PROJECT_KEY = "AlexeyNavalniyPrinted_avel_00c2ac06-035e-4591-964e-229da28aa9fd"
-    }
-
     agent {
         kubernetes {
             label 'docker-build-pod'
@@ -43,7 +39,9 @@ pipeline {
                 script {
                     def scannerHome = tool 'SonarScanner'
                     withSonarQubeEnv(installationName: 'sonarqube') {
-                        sh "${scannerHome}/bin/sonar-scanner -Dsonar.projectKey=${env.SONAR_PROJECT_KEY}"
+                        withCredentials([secretText('credentialsId': 'sonar-project-key', Variable: 'projectKey')]) {
+                            sh "${scannerHome}/bin/sonar-scanner -Dsonar.projectKey=${projectKey}"
+                        }
                     }
                 }
             }
